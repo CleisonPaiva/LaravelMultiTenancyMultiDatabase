@@ -3,6 +3,7 @@
 use App\Http\Controllers\Tenant\CompanyController;
 use App\Http\Controllers\Tenant\TenantController;
 //
+Route::get('company/datatable', [CompanyController::class,'datatable']);
 Route::resource('company', CompanyController::class);
 //
 //Route::get('companies', 'Tenant\CompanyController@index')->name('company.index');

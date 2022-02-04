@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Tenant;
 
-use App\DataTables\Logs\CompanyTable;
 use App\Events\Tenant\DatabaseCreated;
 use App\Http\Requests\Tenant\StoreUpdateCompanyFormRequest;
 use App\Models\Company;
@@ -24,6 +23,23 @@ class CompanyController extends Controller
     {
         $this->company = $company;
     }
+    public function datatable(Request $request)
+    {
+        try {
+            $companies = $this->company ->select('id','name','subdomain','db_database');
+
+            return Datatables::of($companies)
+                ->filter(function ($query) use ($request) {
+//                    if ($request->has('nome')) {
+//                        $query->where('commom_companies.nome', 'ilike', "%{$request->get('nome')}%");
+//                    }
+                })
+                ->make(true);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
 
     public function index()
     {
@@ -49,54 +65,23 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-//        $company = $this->company->create([
-//            'name'          => 'Empresa x ' . Str::random(5),
-//            'subdomain'        => Str::random(5) . 'minhaempresa.com',
-//            'bd_database'   => 'multi_tenant_default',
-//            'bd_hostname'   => 'postgres',
-//            'bd_username'   => 'default',
-//            'bd_password'   => 'secret',
-//        ]);
-//
-//        if (true)
-//            event(new CompanyCreated($company));
-//        else
-//            event(new DatabaseCreated($company));
-//
-//        dd($company);
-////dd($request->all());
+
+
         $company = $this->company->create($request->all());
 
-//        if ($request->has('create_database'))
-        if (true)
+
+//        {dd('ri');}
+
+//        if (true)
+        if ($request->has('createdatabase'))
             event(new CompanyCreated($company));
-//        else
-//            event(new DatabaseCreated($company));
+        else
+            event(new DatabaseCreated($company));
 
         return redirect()
             ->route('company.index')
             ->withSuccess('Cadastro realizado com sucesso!');
 
-//        $company = $this->company->create([
-//            'name'          => 'Empresa x ' . Str::random(5),
-//            'subdomain'        => Str::random(5) . 'minhaempresa.com',
-//            'db_database'   => 'testa',
-//            'db_hostname'   => 'postgres-postgis',
-//            'db_username'   => 'default',
-//            'db_password'   => 'secret',
-//        ]);
-//
-//        //Cria o database/checkbox
-//        if (false) {
-//            event( new CompanyCreated( $company ) );
-//        }
-//        //Se o banco ja estiver criado executa so as migrates,
-////        se tiver em outro servidor precisa alternar a conexao
-//        else {
-//            event( new DatabaseCreated( $company ) );
-//        }
-
-//        dd($company);
     }
 //    public function index()
 //    {
@@ -137,13 +122,15 @@ class CompanyController extends Controller
      */
     public function edit($domain)
     {
-//        // $company = $this->company->find($id);
+
+         $company = $this->company->find($domain);
 //        $company = $this->company->where('subdomain', $domain)->first();
-//
-//        if (!$company)
-//            return redirect()->back();
-//
-//        return view('tenants.companies.edit', compact('company'));
+//        dd($company);
+        if (!$company)
+            return redirect()->back();
+
+
+        return view('company.edit', compact('company'));
     }
 
     /**
@@ -153,16 +140,16 @@ class CompanyController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(StoreUpdateCompanyFormRequest $request, $id)
+    public function update(Request $request, $id)
     {
-//        if (!$company = $this->company->find($id))
-//            return redirect()->back()->withInput();
-//
-//        $company->update($request->all());
-//
-//        return redirect()
-//            ->route('company.index')
-//            ->withSuccess('Atualizado com sucesso!');
+        if (!$company = $this->company->find($id))
+            return redirect()->back()->withInput();
+
+        $company->update($request->all());
+
+        return redirect()
+            ->route('company.index')
+            ->withSuccess('Atualizado com sucesso!');
     }
 
     /**
